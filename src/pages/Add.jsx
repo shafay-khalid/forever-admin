@@ -18,10 +18,12 @@ const Add = ({ token }) => {
   const [subCategory, setSubCategory] = useState("Topwear");
   const [bestseller, setBestseller] = useState(false);
   const [sizes, setSizes] = useState([]);
+  const [isLoading, setIsLoading] = useState(false); // New state for loading
 
   const onSubmitHandler = async (e) => {
     try {
       e.preventDefault();
+      setIsLoading(true); // Start loading
       const formData = new FormData();
       formData.append("name", name);
       formData.append("description", description);
@@ -44,6 +46,7 @@ const Add = ({ token }) => {
 
       if (response.data.success) {
         toast.success(response.data.message);
+        // Reset all form fields
         setName("");
         setDescription("");
         setImage1(false);
@@ -51,12 +54,18 @@ const Add = ({ token }) => {
         setImage3(false);
         setImage4(false);
         setPrice("");
+        setCategory("Men"); // Reset to default
+        setSubCategory("Topwear"); // Reset to default
+        setBestseller(false); // Reset bestseller
+        setSizes([]); // Reset sizes
       } else {
         toast.error(response.data.message);
       }
     } catch (error) {
       console.log(error);
       toast.error(error.message);
+    } finally {
+      setIsLoading(false); // Stop loading
     }
   };
 
@@ -283,8 +292,12 @@ const Add = ({ token }) => {
           Add to bestseller
         </label>
       </div>
-      <button className="w-28 py-3 mt-4 bg-black text-white" type="submit">
-        ADD
+      <button
+        className="w-28 py-3 mt-4 bg-black text-white disabled:bg-gray-500"
+        type="submit"
+        disabled={isLoading}
+      >
+        {isLoading ? "Loading..." : "ADD"}
       </button>
     </form>
   );
