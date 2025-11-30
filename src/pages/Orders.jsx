@@ -6,6 +6,7 @@ import { assets } from "../assets/admin_assets/assets";
 
 const Orders = ({ token }) => {
   const [orders, setOrders] = useState([]);
+  const [filter, setFilter] = useState("All"); // New state for filter
 
   const fetchAllOrders = async () => {
     if (!token) {
@@ -20,7 +21,9 @@ const Orders = ({ token }) => {
       );
 
       if (response.data.success) {
-        setOrders(response.data.orders);
+        // Sort orders by date descending (most recent first)
+        const sortedOrders = response.data.orders.sort((a, b) => new Date(b.date) - new Date(a.date));
+        setOrders(sortedOrders);
       } else {
         toast.error(response.data.message);
       }
@@ -51,11 +54,31 @@ const Orders = ({ token }) => {
     fetchAllOrders();
   }, []);
 
+  // Filter orders based on selected filter
+  const filteredOrders = filter === "All" ? orders : orders.filter(order => order.status === filter);
+
   return (
     <div>
       <h3>Order Page</h3>
+      {/* Filter Dropdown */}
+      <div className="mb-4">
+        <label htmlFor="filter" className="mr-2 font-medium">Filter Orders:</label>
+        <select
+          id="filter"
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          className="p-2 border border-gray-300 rounded"
+        >
+          <option value="All">All Orders</option>
+          <option value="Order Placed">Order Placed</option>
+          <option value="Packing">Packing</option>
+          <option value="Shipped">Shipped</option>
+          <option value="Out For Delivery">Out For Delivery</option>
+          <option value="Delivered">Delivered</option>
+        </select>
+      </div>
       <div>
-        {orders.map((order, index) => (
+        {filteredOrders.map((order, index) => (
           <div
             className="grid grid-cols-1 sm:grid-cols-[0.5fr_2fr_1fr] lg:grid-cols-[0.5fr_2fr_1fr_1fr_1fr] gap-3 items-start border-2 border-gray-200 p-5 md:p-8 my-3 md:my-4 text-xs sm:text-sm text-gray-700"
             key={index}
